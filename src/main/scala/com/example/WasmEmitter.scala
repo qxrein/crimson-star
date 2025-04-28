@@ -8,41 +8,27 @@ class WasmEmitter {
   private var localCount = 0
   private val locals = mutable.Map[String, Int]()
 
-  // Emits a complete WASM module for the given program
   def emitProgram(program: Program): Array[Byte] = {
     buffer.clear()
-
-    // WASM module header
     putMagicAndVersion()
-
-    // Type section: defines function types
     emitTypeSection()
-
-    // Function section: declares functions
     emitFunctionSection()
-
-    // Export section: exports the main function
     emitExportSection()
-
-    // Code section: contains function bodies
     emitCodeSection(program)
-
     buffer.array().take(buffer.position())
   }
 
-  // Writes the WASM magic number and version
   private def putMagicAndVersion(): Unit = {
     buffer.put(0x00.toByte)
     buffer.put(0x61.toByte)
     buffer.put(0x73.toByte)
-    buffer.put(0x6d.toByte) // "\0asm"
+    buffer.put(0x6d.toByte)
     buffer.put(0x01.toByte)
     buffer.put(0x00.toByte)
     buffer.put(0x00.toByte)
-    buffer.put(0x00.toByte) // version 1
+    buffer.put(0x00.toByte)
   }
 
-  // Encodes an integer in LEB128 format to the main buffer
   private def putLEB128(value: Int): Unit = {
     var v = value
     while (true) {
@@ -57,7 +43,6 @@ class WasmEmitter {
     }
   }
 
-  // Encodes an integer in LEB128 format to the specified buffer
   private def putLEB128(buf: ByteBuffer, value: Int): Unit = {
     var v = value
     while (true) {
@@ -72,157 +57,129 @@ class WasmEmitter {
     }
   }
 
-  // Emits the type section: one function type () -> i32
   private def emitTypeSection(): Unit = {
     val sectionBuffer = ByteBuffer.allocate(1024).order(ByteOrder.LITTLE_ENDIAN)
-    
-    sectionBuffer.put(0x01.toByte) // 1 type
-    sectionBuffer.put(0x60.toByte) // func type
-    sectionBuffer.put(0x00.toByte) // 0 params
-    sectionBuffer.put(0x01.toByte) // 1 result
-    sectionBuffer.put(0x7F.toByte) // i32
-
-    buffer.put(0x01.toByte) // section ID
-    putLEB128(sectionBuffer.position()) // section size
+    sectionBuffer.put(0x01.toByte)
+    sectionBuffer.put(0x60.toByte)
+    sectionBuffer.put(0x00.toByte)
+    sectionBuffer.put(0x01.toByte)
+    sectionBuffer.put(0x7F.toByte)
+    buffer.put(0x01.toByte)
+    putLEB128(sectionBuffer.position())
     buffer.put(sectionBuffer.array().take(sectionBuffer.position()))
   }
 
-  // Emits the function section: one function with type 0
   private def emitFunctionSection(): Unit = {
     val sectionBuffer = ByteBuffer.allocate(1024).order(ByteOrder.LITTLE_ENDIAN)
-    
-    sectionBuffer.put(0x01.toByte) // 1 function
-    sectionBuffer.put(0x00.toByte) // type index 0
-
-    buffer.put(0x03.toByte) // section ID
-    putLEB128(sectionBuffer.position()) // section size
+    sectionBuffer.put(0x01.toByte)
+    sectionBuffer.put(0x00.toByte)
+    buffer.put(0x03.toByte)
+    putLEB128(sectionBuffer.position())
     buffer.put(sectionBuffer.array().take(sectionBuffer.position()))
   }
 
-  // Emits the export section: exports "main" function
   private def emitExportSection(): Unit = {
     val sectionBuffer = ByteBuffer.allocate(1024).order(ByteOrder.LITTLE_ENDIAN)
-    
-    sectionBuffer.put(0x01.toByte) // 1 export
-    sectionBuffer.put(0x04.toByte) // name length
+    sectionBuffer.put(0x01.toByte)
+    sectionBuffer.put(0x04.toByte)
     "main".getBytes.foreach(sectionBuffer.put)
-    sectionBuffer.put(0x00.toByte) // export kind (function)
-    sectionBuffer.put(0x00.toByte) // function index 0
-
-    buffer.put(0x07.toByte) // section ID
-    putLEB128(sectionBuffer.position()) // section size
+    sectionBuffer.put(0x00.toByte)
+    sectionBuffer.put(0x00.toByte)
+    buffer.put(0x07.toByte)
+    putLEB128(sectionBuffer.position())
     buffer.put(sectionBuffer.array().take(sectionBuffer.position()))
   }
 
-  // Emits the code section: one function body with locals and instructions
   private def emitCodeSection(program: Program): Unit = {
     val sectionBuffer = ByteBuffer.allocate(1024).order(ByteOrder.LITTLE_ENDIAN)
-    
-    sectionBuffer.put(0x01.toByte) // 1 function
-    
+    sectionBuffer.put(0x01.toByte)
     val bodyBuffer = ByteBuffer.allocate(1024).order(ByteOrder.LITTLE_ENDIAN)
-    
-    // Reset local count for this function
     localCount = 0
     locals.clear()
-
-    // Emit all expressions, ensuring the last one leaves a value
+    println("Starting code emission")
     program.exprs.zipWithIndex.foreach { case (expr, idx) =>
       val isLast = idx == program.exprs.length - 1
+      println(s"Emitting expr: $expr, isLast: $isLast")
       emitExpr(expr, bodyBuffer, isLast)
     }
-
-    // Local declarations (after emitting expressions to know localCount)
     val localDeclBuffer = ByteBuffer.allocate(1024).order(ByteOrder.LITTLE_ENDIAN)
     if (localCount > 0) {
-      localDeclBuffer.put(0x01.toByte) // 1 local block
-      putLEB128(localDeclBuffer, localCount) // number of locals
-      localDeclBuffer.put(0x7F.toByte) // i32
+      localDeclBuffer.put(0x01.toByte)
+      putLEB128(localDeclBuffer, localCount)
+      localDeclBuffer.put(0x7F.toByte)
     } else {
-      localDeclBuffer.put(0x00.toByte) // 0 local blocks
+      localDeclBuffer.put(0x00.toByte)
     }
-
-    // Combine local declarations and body
     bodyBuffer.flip()
     val finalBodyBuffer = ByteBuffer.allocate(1024).order(ByteOrder.LITTLE_ENDIAN)
     finalBodyBuffer.put(localDeclBuffer.array().take(localDeclBuffer.position()))
     finalBodyBuffer.put(bodyBuffer)
-
-    // If no expressions, return 0
     if (program.exprs.isEmpty) {
-      finalBodyBuffer.put(0x41.toByte) // i32.const
-      putLEB128(finalBodyBuffer, 0) // 0
+      finalBodyBuffer.put(0x41.toByte)
+      putLEB128(finalBodyBuffer, 0)
     }
-
-    // End function
-    finalBodyBuffer.put(0x0b.toByte) // end
-
-    // Write function body size and content
-    putLEB128(sectionBuffer, finalBodyBuffer.position()) // body size
+    finalBodyBuffer.put(0x0b.toByte)
+    putLEB128(sectionBuffer, finalBodyBuffer.position())
     sectionBuffer.put(finalBodyBuffer.array().take(finalBodyBuffer.position()))
-    
-    // Write code section
-    buffer.put(0x0a.toByte) // section ID
-    putLEB128(sectionBuffer.position()) // section size
+    buffer.put(0x0a.toByte)
+    putLEB128(sectionBuffer.position())
     buffer.put(sectionBuffer.array().take(sectionBuffer.position()))
   }
 
-  // Emits WASM instructions for an expression, ensuring stack correctness
   private def emitExpr(expr: Expr, buf: ByteBuffer, isLast: Boolean): Unit = expr match {
     case IntLit(value) =>
-      buf.put(0x41.toByte) // i32.const
+      println(s"Emitting IntLit($value)")
+      buf.put(0x41.toByte)
       putLEB128(buf, value)
-      
     case BinOp(left, op, right) =>
+      println(s"Emitting BinOp($left, $op, $right)")
       emitExpr(left, buf, false)
       emitExpr(right, buf, false)
       op match {
-        case "+" => buf.put(0x6a.toByte) // i32.add
-        case "-" => buf.put(0x6b.toByte) // i32.sub
-        case "*" => buf.put(0x6c.toByte) // i32.mul
-        case "/" => buf.put(0x6d.toByte) // i32.div_s
+        case "+" => buf.put(0x6a.toByte)
+        case "-" => buf.put(0x6b.toByte)
+        case "*" => buf.put(0x6c.toByte)
+        case "/" => buf.put(0x6d.toByte)
       }
-      
     case Let(name, value) =>
+      println(s"Emitting Let($name, $value)")
       emitExpr(value, buf, false)
       if (!locals.contains(name)) {
         locals(name) = localCount
+        println(s"Assigned local: $name = $localCount")
         localCount += 1
       }
-      buf.put(0x21.toByte) // local.set
+      buf.put(0x21.toByte)
       putLEB128(buf, locals(name))
-      // Return the value if last expression
       if (isLast) {
-        buf.put(0x20.toByte) // local.get
+        println(s"Last Let, returning local: $name")
+        buf.put(0x20.toByte)
         putLEB128(buf, locals(name))
       }
-      
     case Ident(name) =>
       if (!locals.contains(name)) {
         throw new IllegalStateException(s"Undefined variable: $name")
       }
-      buf.put(0x20.toByte) // local.get
+      println(s"Emitting Ident($name), local: ${locals(name)}")
+      buf.put(0x20.toByte)
       putLEB128(buf, locals(name))
-      
     case FnDef(name, params, body) =>
-      // Placeholder: emit body, treat as let binding for simplicity
+      println(s"Emitting FnDef($name, $params, $body)")
       emitExpr(body, buf, isLast)
       if (isLast && !leavesValue(body)) {
-        buf.put(0x41.toByte) // i32.const
-        putLEB128(buf, 0) // return 0
+        buf.put(0x41.toByte)
+        putLEB128(buf, 0)
       }
-      
     case FnCall(name, args) =>
-      // Placeholder: emit args, return 0
+      println(s"Emitting FnCall($name, $args)")
       args.foreach(emitExpr(_, buf, false))
-      args.foreach(_ => buf.put(0x1a.toByte)) // drop each arg
+      args.foreach(_ => buf.put(0x1a.toByte))
       if (isLast) {
-        buf.put(0x41.toByte) // i32.const
-        putLEB128(buf, 0) // return 0
+        buf.put(0x41.toByte)
+        putLEB128(buf, 0)
       }
   }
 
-  // Helper to determine if an expression leaves a value on the stack
   private def leavesValue(expr: Expr): Boolean = expr match {
     case IntLit(_) => true
     case BinOp(_, _, _) => true

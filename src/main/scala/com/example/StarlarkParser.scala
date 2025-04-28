@@ -2,47 +2,59 @@ package com.example
 
 import scala.util.parsing.combinator._
 
-class StarlarkParser extends RegexParsers {
-  override def skipWhitespace = true
+// Import AST types from Ast.scala
+import com.example.{Expr, Program, IntLit, BinOp, Let, Ident, FnDef, FnCall}
 
-  def program: Parser[Program] = rep1(expr) ^^ Program
-  
-  def expr: Parser[Expr] = simpleExpr ~ rep(operator ~ simpleExpr) ^^ {
-    case first ~ rest => rest.foldLeft(first) {
-      case (left, op ~ right) => BinOp(left, op, right)
+object StarlarkParser extends RegexParsers {
+  override def skipWhitespace = true
+  override val whiteSpace = """[ \t\r\f\n]+""".r // Include \n in whitespace
+
+  def program: Parser[Program] = rep(statement) ^^ { stmts => Program(stmts) }
+
+  def statement: Parser[Expr] =
+    (let | fnDef | expr) <~ opt("\n") // Allow optional newline after statements
+
+  def let: Parser[Let] =
+    ident ~ "=" ~ expr ^^ { case id ~ _ ~ e => Let(id, e) }
+
+  def ident: Parser[String] =
+    """[a-zA-Z_][a-zA-Z0-9_]*""".r
+
+  def fnDef: Parser[FnDef] =
+    "def" ~ ident ~ "(" ~ repsep(ident, ",") ~ ")" ~ "=" ~ expr ^^ {
+      case _ ~ name ~ _ ~ params ~ _ ~ _ ~ body => FnDef(name, params, body)
     }
+
+  // Expression parser with operator precedence
+  def expr: Parser[Expr] = addSub
+
+  def addSub: Parser[Expr] =
+    mulDiv ~ rep(("+" | "-") ~ mulDiv) ^^ {
+      case left ~ ops => ops.foldLeft(left) {
+        case (acc, op ~ right) => BinOp(acc, op, right)
+      }
+    }
+
+  def mulDiv: Parser[Expr] =
+    factor ~ rep(("*" | "/") ~ factor) ^^ {
+      case left ~ ops => ops.foldLeft(left) {
+        case (acc, op ~ right) => BinOp(acc, op, right)
+      }
+    }
+
+  def factor: Parser[Expr] =
+    "(" ~> expr <~ ")" | intLit | ident ^^ Ident.apply | fnCall
+
+  def intLit: Parser[IntLit] =
+    """-?\d+""".r ^^ { n => IntLit(n.toInt) }
+
+  def fnCall: Parser[FnCall] =
+    ident ~ "(" ~ repsep(expr, ",") ~ ")" ^^ {
+      case name ~ _ ~ args ~ _ => FnCall(name, args)
+    }
+
+  def parse(input: String): Program = parseAll(program, input) match {
+    case Success(result, _) => result
+    case failure: NoSuccess => throw new IllegalArgumentException(s"Parse error: ${failure.msg}")
   }
-  
-  def simpleExpr: Parser[Expr] = (
-    intLit 
-    | let 
-    | fnDef 
-    | fnCall 
-    | ident
-    | "(" ~> expr <~ ")"
-  )
-  
-  def operator: Parser[String] = "+" | "-" | "*" | "/"
-  
-  def intLit: Parser[IntLit] = """-?\d+""".r ^^ (s => IntLit(s.toInt))
-  
-  def ident: Parser[Ident] = """[a-z_]\w*""".r ^^ Ident
-  
-  def let: Parser[Let] = (ident <~ "=") ~ expr ^^ { 
-    case id ~ e => Let(id.name, e) 
-  }
-  
-  def fnDef: Parser[FnDef] = 
-    ("def" ~> ident) ~ ("(" ~> repsep(ident, ",") <~ ")") ~ ("=" ~> expr) ^^ {
-      case id ~ params ~ body => FnDef(id.name, params.map(_.name), body)
-    }
-    
-  def fnCall: Parser[FnCall] = 
-    ident ~ ("(" ~> repsep(expr, ",") <~ ")") ^^ { case id ~ args => FnCall(id.name, args) }
-  
-  def parse(input: String): Either[String, Program] = 
-    parseAll(program, input) match {
-      case Success(result, _) => Right(result)
-      case NoSuccess(msg, next) => Left(s"Error at ${next.pos}: $msg")
-    }
 }

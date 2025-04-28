@@ -419,3 +419,63 @@ org.eclipse.lsp4j.jsonrpc.ResponseErrorException: Method not found: window/showM
 2025.04.28 16:41:31 WARN  no build target for: /home/chikoyeat/projects/crimson-sail/src/main/scala/com/example/WasmEmitter.scala[0m
 2025.04.28 16:41:31 INFO  Shutting down server[0m
 2025.04.28 16:41:31 INFO  shutting down Metals[0m
+2025.04.28 17:21:12 INFO  Started: Metals version 1.4.2 in folders '/home/chikoyeat/projects/crimson-sail' for client helix 24.7 (079f5442).[0m
+2025.04.28 17:23:43 INFO  Started: Metals version 1.4.2 in folders '/home/chikoyeat/projects/crimson-sail' for client helix 24.7 (079f5442).[0m
+2025.04.28 17:23:44 ERROR Unexpected error initializing server: 
+org.eclipse.lsp4j.jsonrpc.ResponseErrorException: Method not found: window/showMessageRequest
+	at org.eclipse.lsp4j.jsonrpc.RemoteEndpoint.handleResponse(RemoteEndpoint.java:220)
+	at org.eclipse.lsp4j.jsonrpc.RemoteEndpoint.consume(RemoteEndpoint.java:204)
+	at org.eclipse.lsp4j.jsonrpc.json.StreamMessageProducer.handleMessage(StreamMessageProducer.java:185)
+	at org.eclipse.lsp4j.jsonrpc.json.StreamMessageProducer.listen(StreamMessageProducer.java:97)
+	at org.eclipse.lsp4j.jsonrpc.json.ConcurrentMessageProcessor.run(ConcurrentMessageProcessor.java:114)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.lang.Thread.run(Thread.java:1583)
+[0m
+2025.04.28 17:23:47 INFO  no build target found for /home/chikoyeat/projects/crimson-sail/src/main/scala/com/example/StarlarkParser.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.04.28 17:23:47 INFO  no build target found for /home/chikoyeat/projects/crimson-sail/src/main/scala/com/example/StarlarkParser.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.04.28 17:23:49 INFO  no build target found for /home/chikoyeat/projects/crimson-sail/src/main/scala/com/example/StarlarkParser.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.04.28 17:23:49 WARN  no build target for: /home/chikoyeat/projects/crimson-sail/src/main/scala/com/example/StarlarkParser.scala[0m
+2025.04.28 17:23:49 INFO  no build target found for /home/chikoyeat/projects/crimson-sail/src/main/scala/com/example/StarlarkParser.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.04.28 17:24:10 WARN  no build target for: /home/chikoyeat/projects/crimson-sail/src/main/scala/com/example/StarlarkParser.scala[0m
+2025.04.28 17:24:10 INFO  Shutting down server[0m
+2025.04.28 17:24:10 INFO  shutting down Metals[0m
+2025.04.28 17:24:45 INFO  Started: Metals version 1.4.2 in folders '/home/chikoyeat/projects/crimson-sail' for client helix 24.7 (079f5442).[0m
+2025.04.28 17:24:46 ERROR Unexpected error initializing server: 
+org.eclipse.lsp4j.jsonrpc.ResponseErrorException: Method not found: window/showMessageRequest
+	at org.eclipse.lsp4j.jsonrpc.RemoteEndpoint.handleResponse(RemoteEndpoint.java:220)
+	at org.eclipse.lsp4j.jsonrpc.RemoteEndpoint.consume(RemoteEndpoint.java:204)
+	at org.eclipse.lsp4j.jsonrpc.json.StreamMessageProducer.handleMessage(StreamMessageProducer.java:185)
+	at org.eclipse.lsp4j.jsonrpc.json.StreamMessageProducer.listen(StreamMessageProducer.java:97)
+	at org.eclipse.lsp4j.jsonrpc.json.ConcurrentMessageProcessor.run(ConcurrentMessageProcessor.java:114)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.lang.Thread.run(Thread.java:1583)
+[0m
+2025.04.28 17:24:51 INFO  Shutting down server[0m
+2025.04.28 17:24:51 INFO  shutting down Metals[0m
+2025.04.28 17:25:07 INFO  Started: Metals version 1.4.2 in folders '/home/chikoyeat/projects/crimson-sail' for client helix 24.7 (079f5442).[0m
+2025.04.28 17:25:07 ERROR Unexpected error initializing server: 
+org.eclipse.lsp4j.jsonrpc.ResponseErrorException: Method not found: window/showMessageRequest
+	at org.eclipse.lsp4j.jsonrpc.RemoteEndpoint.handleResponse(RemoteEndpoint.java:220)
+	at org.eclipse.lsp4j.jsonrpc.RemoteEndpoint.consume(RemoteEndpoint.java:204)
+	at org.eclipse.lsp4j.jsonrpc.json.StreamMessageProducer.handleMessage(StreamMessageProducer.java:185)
+	at org.eclipse.lsp4j.jsonrpc.json.StreamMessageProducer.listen(StreamMessageProducer.java:97)
+	at org.eclipse.lsp4j.jsonrpc.json.ConcurrentMessageProcessor.run(ConcurrentMessageProcessor.java:114)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.lang.Thread.run(Thread.java:1583)
+[0m
+2025.04.28 17:25:11 INFO  no build target found for /home/chikoyeat/projects/crimson-sail/src/main/scala/com/example/Main.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.04.28 17:25:11 INFO  no build target found for /home/chikoyeat/projects/crimson-sail/src/main/scala/com/example/Main.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.04.28 17:25:13 INFO  no build target found for /home/chikoyeat/projects/crimson-sail/src/main/scala/com/example/Main.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.04.28 17:25:33 WARN  no build target for: /home/chikoyeat/projects/crimson-sail/src/main/scala/com/example/Main.scala[0m
+2025.04.28 17:25:33 INFO  Shutting down server[0m
+2025.04.28 17:25:33 INFO  no build target found for /home/chikoyeat/projects/crimson-sail/src/main/scala/com/example/Main.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.04.28 17:25:33 INFO  shutting down Metals[0m
