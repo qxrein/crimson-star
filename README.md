@@ -1,7 +1,7 @@
 # crimson-star
 tiny Starlark subset compiler that compiles a restricted Starlark script into WASM bytecode.
 
----
+
 ```shell
  sbt "run src/resources/examples/<something>.star output.wasm"
 ```
@@ -48,8 +48,8 @@ Code[1]:
 00000035
 ```
 ## Contributing
----
+
 All contributors must follow the [Code of Conduct](https://github.com/qxrein/crimson-star/blob/main/CODE_OF_CONDUCT.md).
 ## License
----
+
 All code under this repository is licensed under the [MIT](https://github.com/qxrein/crimson-star/blob/main/LICENSE) license.
